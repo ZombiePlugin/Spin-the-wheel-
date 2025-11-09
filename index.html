@@ -3,72 +3,60 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Endless Spin Wheel</title>
+<title>Spin the Wheel</title>
 <style>
   :root{
     --size: min(84vmin, 620px);
-    --speed: 6s; /* default rotation duration for one full revolution */
+    --speed: 6s;
     --pointer-size: 36px;
-    --label-offset: 38%; /* how far labels are from center (as percentage) */
+    --label-offset: 38%;
   }
 
-  *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
-
   body{
-    min-height:100vh;
     margin:0;
+    min-height:100vh;
     display:flex;
     align-items:center;
     justify-content:center;
-    background:linear-gradient(180deg,#0f1724 0%, #081123 100%);
+    flex-direction:column;
+    background:linear-gradient(180deg,#0f1724,#081123);
     color:#e6eef8;
-    padding:24px;
-  }
-
-  .wrap{
-    text-align:center;
-    max-width:980px;
-    width:100%;
+    font-family:system-ui, sans-serif;
   }
 
   .wheel-area{
     position:relative;
-    margin:0 auto 18px;
     width:var(--size);
     height:var(--size);
-    display:inline-block;
   }
 
-  /* THE WHEEL */
   .wheel{
     width:100%;
     height:100%;
     border-radius:50%;
-    box-shadow: 0 8px 40px rgba(2,6,23,0.7), inset 0 6px 16px rgba(255,255,255,0.02);
+    box-shadow:0 8px 40px rgba(2,6,23,0.7), inset 0 6px 16px rgba(255,255,255,0.02);
     position:relative;
     transform:rotate(0deg);
-    /* CSS animation for endless rotation */
-    animation: spin var(--speed) linear infinite;
-    /* gradient will be set via inline style (JS) */
-    overflow:visible;
-    will-change: transform;
+    overflow:hidden;
   }
 
-  /* small decorative center */
+  .wheel.spinning{
+    animation: spin var(--speed) linear infinite;
+  }
+
   .wheel::after{
     content:"";
     position:absolute;
-    left:50%; top:50%;
+    left:50%;
+    top:50%;
     transform:translate(-50%,-50%);
     width:14%;
     height:14%;
     background:rgba(10,10,10,0.8);
     border-radius:50%;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.6), inset 0 -2px 6px rgba(255,255,255,0.03);
     border:4px solid rgba(255,255,255,0.04);
   }
 
-  /* pointer at top */
   .pointer{
     position:absolute;
     left:50%;
@@ -79,243 +67,127 @@
     border-left: var(--pointer-size) solid transparent;
     border-right: var(--pointer-size) solid transparent;
     border-bottom: calc(var(--pointer-size) * 1.15) solid #ff4d4d;
-    filter:drop-shadow(0 4px 10px rgba(0,0,0,0.6));
     z-index:20;
   }
 
-  .center-plate{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    z-index:5;
-    pointer-events:none;
-  }
-
-  /* labels that sit on the wheel — these rotate with the wheel (so they spin too) */
   .seg-label{
     position:absolute;
     left:50%;
     top:50%;
-    transform-origin: 0 0;
+    transform-origin:0 0;
     font-weight:600;
     font-size:clamp(10px,1.6vmin,15px);
     color:#071021;
-    text-shadow:0 1px 0 rgba(255,255,255,0.2);
     user-select:none;
     pointer-events:none;
-    white-space:nowrap;
   }
 
-  /* small radial separators for aesthetic */
-  .wheel .tick{
+  .tick{
     position:absolute;
     left:50%;
     top:50%;
     width:2px;
     height:50%;
-    background: rgba(255,255,255,0.06);
-    transform-origin: 0 0;
+    background:rgba(255,255,255,0.06);
+    transform-origin:0 0;
     pointer-events:none;
   }
 
-  /* Controls */
   .controls{
     display:flex;
     gap:10px;
-    justify-content:center;
-    margin-top:12px;
+    margin-top:20px;
     flex-wrap:wrap;
+    justify-content:center;
   }
 
-  .controls > *{
-    background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-    border:1px solid rgba(255,255,255,0.04);
-    color:var(--text,#e6eef8);
+  .controls button, .controls input{
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.15);
+    color:#e6eef8;
     padding:8px 12px;
     border-radius:10px;
     cursor:pointer;
     font-weight:600;
-    font-size:14px;
   }
 
-  .controls input[type="range"]{
-    width:220px;
-    accent-color:#ffcc00;
-    cursor:ew-resize;
-    margin-left:6px;
-    vertical-align:middle;
-  }
-
-  .credits{
-    margin-top:16px;
-    opacity:0.8;
-    font-size:13px;
-  }
-
-  /* spin keyframes */
   @keyframes spin{
     from{ transform: rotate(0deg); }
     to{ transform: rotate(360deg); }
   }
-
-  /* Respect reduced motion */
-  @media (prefers-reduced-motion: reduce){
-    .wheel{ animation: none; }
-  }
-
-  /* small mobile adjustments */
-  @media (max-width:420px){
-    :root{ --pointer-size: 26px; }
-  }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1 style="margin:0 0 12px;font-size:clamp(20px,3.6vmin,28px)">Endless Spin Wheel</h1>
-
-    <div class="wheel-area" aria-hidden="false">
-      <div class="pointer" role="img" aria-label="Pointer"></div>
-
-      <div id="wheel" class="wheel" role="img" aria-label="Spinning prize wheel">
-        <!-- labels & ticks inserted by JS -->
-        <div class="center-plate"></div>
-      </div>
-    </div>
-
-    <div class="controls" aria-hidden="false">
-      <div style="display:flex;align-items:center;gap:8px;">
-        Speed:
-        <input id="speedRange" type="range" min="1" max="30" value="6" />
-        <span id="speedLabel">6s/rev</span>
-      </div>
-
-      <button id="toggleSpin">Pause</button>
-      <button id="shuffle">Shuffle Colors</button>
-      <button id="regen">Randomize</button>
-    </div>
-
-    <div class="credits">Customize labels/colors in the code. Wheel rotates continuously (infinite).</div>
+  <h1>Spin the Wheel</h1>
+  <div class="wheel-area">
+    <div class="pointer"></div>
+    <div id="wheel" class="wheel"></div>
+  </div>
+  <div class="controls">
+    <button id="spinBtn">Spin</button>
+    <button id="pauseBtn">Pause</button>
+    <label>Speed: <input id="speedRange" type="range" min="1" max="20" value="6"></label>
   </div>
 
 <script>
-/*
-  Endless Spin Wheel
-  - Edit `labels` and `colors` below to change segments
-  - The wheel uses CSS animation for continuous rotation.
-*/
-
-const labels = [
-  "Prize A", "Prize B", "Prize C", "Prize D",
-  "Prize E", "Prize F", "Prize G", "Prize H"
-];
-
-const colors = [
-  "#FFD166", "#06D6A0", "#118AB2", "#EF476F",
-  "#CB997E", "#8E7DFF", "#FFB4A2", "#83C5BE"
-];
-
 const wheel = document.getElementById('wheel');
+const spinBtn = document.getElementById('spinBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const speedRange = document.getElementById('speedRange');
 
-let speedSeconds = 6; // one full revolution in seconds
-document.documentElement.style.setProperty('--speed', speedSeconds + 's');
-document.getElementById('speedLabel').textContent = speedSeconds + 's/rev';
-document.getElementById('speedRange').value = speedSeconds;
+let spinning = false;
+let speed = 6;
 
-function buildWheel(labelsArr, colorsArr){
-  // clear any existing labels/ticks
-  wheel.innerHTML = '<div class="center-plate"></div>';
-  const segCount = labelsArr.length;
-  const anglePer = 360 / segCount;
-  // build conic-gradient string
-  let gradParts = [];
-  for(let i=0;i<segCount;i++){
-    const start = anglePer * i;
-    const end = start + anglePer;
-    gradParts.push(`${colorsArr[i % colorsArr.length]} ${start}deg ${end}deg`);
-  }
-  wheel.style.background = `conic-gradient(${gradParts.join(',')})`;
+// basic labels & colors
+const labels = ["Prize A","Prize B","Prize C","Prize D","Prize E","Prize F"];
+const colors = ["#FFD166","#06D6A0","#118AB2","#EF476F","#8E7DFF","#FFB4A2"];
 
-  // add ticks and labels
-  for(let i=0;i<segCount;i++){
-    const a = anglePer * i;
-    const tick = document.createElement('div');
-    tick.className = 'tick';
-    tick.style.transform = `rotate(${a}deg) translate(-1px, -50%)`;
+function buildWheel(){
+  const segs = labels.length;
+  const degPer = 360/segs;
+  const gradient = labels.map((_,i)=>`${colors[i%colors.length]} ${i*degPer}deg ${(i+1)*degPer}deg`).join(',');
+  wheel.style.background = `conic-gradient(${gradient})`;
+  wheel.innerHTML = "";
+  for(let i=0;i<segs;i++){
+    const tick=document.createElement('div');
+    tick.className='tick';
+    tick.style.transform=`rotate(${i*degPer}deg) translate(-1px,-50%)`;
     wheel.appendChild(tick);
-
-    // label placement:
-    const label = document.createElement('div');
-    label.className = 'seg-label';
-    // position the label by rotating the label container then translating outward,
-    // then counter-rotating the text so it reads upright
-    const radiusPercent = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--label-offset')) || 38;
-    label.style.transform = `rotate(${a + anglePer/2}deg) translate(0, -${radiusPercent}%) rotate(${- (a + anglePer/2)}deg) translateY(-6px)`;
-    label.textContent = labelsArr[i];
+    const label=document.createElement('div');
+    label.className='seg-label';
+    label.textContent=labels[i];
+    label.style.transform=`rotate(${i*degPer+degPer/2}deg) translate(0,-38%) rotate(${-i*degPer-degPer/2}deg)`;
     wheel.appendChild(label);
   }
 }
+buildWheel();
 
-// initial build
-buildWheel(labels, colors);
-
-// controls
-const speedRange = document.getElementById('speedRange');
-const speedLabel = document.getElementById('speedLabel');
-const toggleSpin = document.getElementById('toggleSpin');
-const shuffleBtn = document.getElementById('shuffle');
-const regenBtn = document.getElementById('regen');
-
-speedRange.addEventListener('input', e=>{
-  speedSeconds = e.target.value;
-  document.documentElement.style.setProperty('--speed', speedSeconds + 's');
-  speedLabel.textContent = speedSeconds + 's/rev';
-});
-
-let spinning = true;
-toggleSpin.addEventListener('click', ()=>{
-  spinning = !spinning;
-  if(spinning){
-    // resume animation by ensuring the animation-play-state is running
-    wheel.style.animationPlayState = 'running';
-    toggleSpin.textContent = 'Pause';
+spinBtn.addEventListener('click',()=>{
+  if(!spinning){
+    wheel.classList.add('spinning');
+    spinning=true;
+    spinBtn.textContent="Stop";
   } else {
-    wheel.style.animationPlayState = 'paused';
-    toggleSpin.textContent = 'Resume';
+    wheel.classList.remove('spinning');
+    spinning=false;
+    spinBtn.textContent="Spin";
   }
 });
 
-// shuffle colors
-shuffleBtn.addEventListener('click', ()=>{
-  // simple Fisher-Yates shuffle
-  for(let i=colors.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [colors[i], colors[j]] = [colors[j], colors[i]];
+pauseBtn.addEventListener('click',()=>{
+  if(wheel.style.animationPlayState==="paused"){
+    wheel.style.animationPlayState="running";
+    pauseBtn.textContent="Pause";
+  } else {
+    wheel.style.animationPlayState="paused";
+    pauseBtn.textContent="Resume";
   }
-  buildWheel(labels, colors);
 });
 
-// regen: random labels/colors of random length
-regenBtn.addEventListener('click', ()=>{
-  const possible = ["Win", "Try", "Bonus", "Free", "X2", "Lose", "Jackpot", "Spin", "Extra", "Gift", "Prize"];
-  const n = Math.floor(Math.random()*6) + 6; // 6..11 segments
-  const newLabels = [];
-  const newColors = [];
-  for(let i=0;i<n;i++){
-    newLabels.push(possible[Math.floor(Math.random()*possible.length)] + (Math.random()<0.25?(" " + (Math.floor(Math.random()*100))):""));
-    newColors.push('#'+Math.floor(Math.random()*0xFFFFFF).toString(16).padStart(6,'0'));
-  }
-  buildWheel(newLabels, newColors);
+speedRange.addEventListener('input',()=>{
+  speed = speedRange.value;
+  document.documentElement.style.setProperty('--speed', speed + 's');
 });
-
-// Accessibility: if user prefers reduced motion, show a message and keep paused
-if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-  wheel.style.animationPlayState = 'paused';
-  toggleSpin.textContent = 'Resume';
-  spinning = false;
-}
-
-// Keep the wheel continuously spinning: nothing else required since CSS handles infinite looping.
 </script>
 </body>
 </html>
