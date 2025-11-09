@@ -7,9 +7,9 @@
 <style>
   :root {
     --size: min(80vmin, 500px);
-    --speed: 1.2s; /* 🔥 default spin speed: one revolution per 1.2s */
+    --speed: 1.2s; /* fast spin */
     --pointer-size: 36px;
-    --label-offset: 38%;
+    --label-offset: 75%; /* moved labels closer to the edge */
   }
 
   body {
@@ -78,12 +78,13 @@
     left: 50%;
     top: 50%;
     transform-origin: 0 0;
-    font-weight: 700;
-    font-size: clamp(18px, 2.5vmin, 22px);
+    font-weight: 900;
+    font-size: clamp(22px, 3vmin, 28px);
     color: #071021;
     text-transform: uppercase;
     user-select: none;
     pointer-events: none;
+    text-shadow: 0 2px 4px rgba(255,255,255,0.4);
   }
 
   .controls {
@@ -139,7 +140,7 @@ function addLabels() {
     const div = document.createElement('div');
     div.className = 'seg-label';
     div.textContent = l.text;
-    div.style.transform = `rotate(${l.angle}deg) translate(0, -38%) rotate(${-l.angle}deg)`;
+    div.style.transform = `rotate(${l.angle}deg) translate(0, -${getComputedStyle(document.documentElement).getPropertyValue('--label-offset')}) rotate(${-l.angle}deg)`;
     wheel.appendChild(div);
   });
 }
