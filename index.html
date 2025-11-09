@@ -7,7 +7,7 @@
 <style>
   :root {
     --size: min(80vmin, 500px);
-    --speed: 1.2s; /* fast spin */
+    --speed: 1.2s;
     --pointer-size: 36px;
   }
 
@@ -74,9 +74,11 @@
 
   .seg-label {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    transform-origin: 0 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-weight: 900;
     font-size: clamp(24px, 3.5vmin, 32px);
     color: #071021;
@@ -115,7 +117,10 @@
 
   <div class="wheel-area">
     <div class="pointer"></div>
-    <div id="wheel" class="wheel"></div>
+    <div id="wheel" class="wheel">
+      <div class="seg-label" style="transform: rotate(90deg) translateY(-38%);">WIN</div>
+      <div class="seg-label" style="transform: rotate(270deg) translateY(-38%);">LOSE</div>
+    </div>
   </div>
 
   <div class="controls">
@@ -129,25 +134,6 @@ const spinBtn = document.getElementById('spinBtn');
 const speedRange = document.getElementById('speedRange');
 let spinning = false;
 
-// Add WIN/LOSE labels — properly positioned near the edge
-function addLabels() {
-  const radiusPercent = 75; // % distance from center toward edge
-  const labels = [
-    { text: "WIN", angle: 90 },
-    { text: "LOSE", angle: 270 }
-  ];
-
-  labels.forEach(l => {
-    const div = document.createElement('div');
-    div.className = 'seg-label';
-    div.textContent = l.text;
-    div.style.transform = `rotate(${l.angle}deg) translate(0, -${radiusPercent}%) rotate(${-l.angle}deg)`;
-    wheel.appendChild(div);
-  });
-}
-addLabels();
-
-// Spin button toggle
 spinBtn.addEventListener('click', () => {
   spinning = !spinning;
   if (spinning) {
@@ -159,7 +145,6 @@ spinBtn.addEventListener('click', () => {
   }
 });
 
-// Speed control
 speedRange.addEventListener('input', () => {
   document.documentElement.style.setProperty('--speed', speedRange.value + 's');
 });
